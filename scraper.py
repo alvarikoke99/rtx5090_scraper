@@ -92,4 +92,4 @@ except Exception as e:
     print("ERROR - ", time.ctime(time.time()))
     print(error_trace)
     if error_alert:
-    sendMsg(sender_addr, receiver_addr, "Error en el servidor", error_trace)
+        sendMsg(sender_addr, receiver_addr, "Error en el servidor", error_trace)
