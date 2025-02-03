@@ -15,9 +15,9 @@ URL_NVIDIA = os.getenv("URL", "https://marketplace.nvidia.com/es-es/consumer/gra
 sender_addr = os.getenv("SENDER_ADDR", "alert-mail@gmail.com")
 receiver_addr = os.getenv("RECEIVER_ADDR", "personal-mail@gmail.com")
 pwd = os.getenv("EMAIL_PWD", "password")
-N = os.getenv("ITER_CYCLES", 1)
-wait_time = os.getenv("WAIT_TIME", 2)
-error_alert = os.getenv("ERROR_ALERT", "FALSE") == "TRUE"
+N = int(os.getenv("ITER_CYCLES", 1))
+wait_time = int(os.getenv("WAIT_TIME", 2))
+error_alert = os.getenv("ERROR_ALERT", "FALSE").lower() == "true"
 
 # code to use in crontab scheduler
 # SHELL=/bin/bash
@@ -92,4 +92,4 @@ except Exception as e:
     print("ERROR - ", time.ctime(time.time()))
     print(error_trace)
     if error_alert:
-        sendMsg(sender_addr, receiver_addr, "Error en el servidor", error_trace)
+    sendMsg(sender_addr, receiver_addr, "Error en el servidor", error_trace)
