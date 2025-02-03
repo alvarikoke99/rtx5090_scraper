@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 import smtplib
 import traceback
@@ -16,7 +17,7 @@ sender_addr = os.getenv("SENDER_ADDR", "alert-mail@gmail.com")
 receiver_addr = os.getenv("RECEIVER_ADDR", "personal-mail@gmail.com")
 pwd = os.getenv("EMAIL_PWD", "password")
 N = int(os.getenv("ITER_CYCLES", 1))
-wait_time = int(os.getenv("WAIT_TIME", 2))
+wait_time = int(os.getenv("WAIT_TIME", 3))
 error_alert = os.getenv("ERROR_ALERT", "FALSE").lower() == "true"
 
 # code to use in crontab scheduler
@@ -54,7 +55,10 @@ def check_button_exists(driver):
         else:
             return False
     except:
+        driver.save_screenshot("headless_screenshot.png")
         return False
+    
+    
 
 def checkStockNvidia(driver):
     is_out_of_stock = check_button_exists(driver)
@@ -71,17 +75,17 @@ try:
     chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36")
     chrome_options.add_argument('--disable-notifications')
     chrome_options.add_argument("--disable-gpu") 
+    chrome_options.page_load_strategy = 'normal'
     driver = webdriver.Chrome(options=chrome_options)
 
     for i in range(N):
         # Check if there is stock of FE
         driver.get(URL_NVIDIA)
         time.sleep(wait_time)
-        driver.save_screenshot("headless_screenshot.png")
         checkStockNvidia(driver)
 
     # Close webdriver
-    time.sleep(2)
+    time.sleep(3)
     driver.close()
     driver.quit() 
     print("Running - ", time.ctime(time.time()))
