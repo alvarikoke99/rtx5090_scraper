@@ -48,16 +48,17 @@ def attachImg(msg, image_path):
                 image.add_header('Content-ID', '<image>')
                 msg.attach(image)
 
-                # Get the current body (it's the last attached part)
-                plain_body = "" # initialize
-                for part in msg.walk():
-                    if part.get_content_type() == 'text/plain': #find the plain text body
+                plain_body = ""
+                # Find and remove the plain text part (older approach)
+                for i in range(len(msg.get_payload())): # iterate by index
+                    part = msg.get_payload()[i]
+                    if part.get_content_type() == 'text/plain':
                         plain_body = part.get_payload()
-                        msg.detach(part) # detach the plain text body
+                        del msg.get_payload()[i] # remove it by index
                         break
 
-                html_body = plain_body + "\n\n<img src='cid:image'>"  # Create the HTML body
-                msg.attach(MIMEText(html_body, 'html')) # attach HTML body
+                html_body = plain_body + "\n\n<img src='cid:image'>"
+                msg.attach(MIMEText(html_body, 'html'))
 
                 return msg
         except Exception as e:
@@ -87,7 +88,7 @@ def sendAlertMailWithImg(sender_addr, receiver_addr, subject, body, image_path):
     msg = attachImg(msg, image_path)
     sendMsg(sender_addr, msg)
 
-def check_button_exists(driver):
+def check_out_of_stock_btn(driver):
     try:
         button_element = driver.find_element(By.CSS_SELECTOR, "button.stock-grey-out.link-btn.i-408")
         if button_element:
@@ -100,7 +101,7 @@ def check_button_exists(driver):
         return False
     
 def checkStockNvidia(driver):
-    is_out_of_stock = check_button_exists(driver)
+    is_out_of_stock = check_out_of_stock_btn(driver)
     if not is_out_of_stock:
         message = "El enlace del articulo es el siguiente: " + URL_NVIDIA
         if SEND_IMG:
