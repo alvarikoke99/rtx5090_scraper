@@ -84,6 +84,8 @@ ipython_config.py
 
 *.properties
 *.env
+logs/
+*.png
 
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
