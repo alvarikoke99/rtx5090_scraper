@@ -100,8 +100,8 @@ def check_button_exists(driver):
         return False
     
 def checkStockNvidia(driver):
-    has_stock = check_button_exists(driver)
-    if has_stock:
+    is_out_of_stock = check_button_exists(driver)
+    if not is_out_of_stock:
         message = "El enlace del articulo es el siguiente: " + URL_NVIDIA
         if SEND_IMG:
             sendAlertMailWithImg(SENDER_ADDR, RECEIVER_ADDR, "STOCK DE RTX 5090", message, IMAGE_PATH)
