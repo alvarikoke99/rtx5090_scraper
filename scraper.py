@@ -125,12 +125,12 @@ def sendAlertMailWithImg(sender_addr, receiver_addr, subject, body, image_path):
 
 def check_stock_button(driver):
     try:
-        button_element = driver.find_elements(By.CSS_SELECTOR, "button.stock-grey-ou.link-btn.i-408")
+        button_element = driver.find_elements(By.CSS_SELECTOR, "button.stock-grey-out.link-btn.i-408")
         # Out of stock button is present so no stock
         if button_element:
             return False
         else:
-            #driver.execute_script("window.scrollBy(0, 500);")
+            driver.execute_script("window.scrollBy(0, 500);")
             driver.save_screenshot(IMAGE_PATH)
             return True
     except:
