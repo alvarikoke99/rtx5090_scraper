@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import time
 from email.mime.multipart import MIMEMultipart
@@ -25,6 +27,39 @@ SEND_IMG = os.getenv("SEND_IMG", "FALSE").lower() == "true"
 # code to use in crontab scheduler
 # SHELL=/bin/bash
 # * 8-23,0-3 * * * DISPLAY=:0 /usr/bin/python3 /home/ubuntu/scraper/linux_scraper_se.py >> /home/ubuntu/Documentos/Scraper/log.out
+
+def clickCookiePopup(driver):
+    try:
+        accept_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))
+        )
+        accept_button.click()
+    except Exception as e:
+        print(f"Error clicking cookie button: {e}")
+
+def hideCookiePopup(driver):
+    try:
+        # Wait for the elements to be present (so we can remove them)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.onetrust-pc-dark-filter"))
+        )
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "onetrust-banner-sdk"))
+        )
+
+        driver.execute_script("""
+            var element1 = document.querySelector("div.onetrust-pc-dark-filter");
+            if (element1) {
+                element1.style.display = "none";
+            }
+            var element2 = document.getElementById("onetrust-banner-sdk");
+            if (element2) {
+                element2.style.display = "none";
+            }
+        """)
+
+    except Exception as e:
+        print(f"Error hiding cookie popup: {e}")
 
 def createMsg(sender_addr, receiver_addr, subject, body) -> MIMEMultipart:
     # Create message object instance
@@ -88,26 +123,30 @@ def sendAlertMailWithImg(sender_addr, receiver_addr, subject, body, image_path):
     msg = attachImg(msg, image_path)
     sendMsg(sender_addr, msg)
 
-def check_out_of_stock_btn(driver):
+def check_stock_button(driver):
     try:
-        button_element = driver.find_element(By.CSS_SELECTOR, "button.stock-grey-out.link-btn.i-408")
+        button_element = driver.find_elements(By.CSS_SELECTOR, "button.stock-grey-ou.link-btn.i-408")
+        # Out of stock button is present so no stock
         if button_element:
+            return False
+        else:
+            #driver.execute_script("window.scrollBy(0, 500);")
             driver.save_screenshot(IMAGE_PATH)
             return True
-        else:
-            return False
     except:
         driver.save_screenshot("error_screenshot.png")
         return False
     
 def checkStockNvidia(driver):
-    is_out_of_stock = check_out_of_stock_btn(driver)
-    if not is_out_of_stock:
+    is_available = check_stock_button(driver)
+    if is_available:
         message = "El enlace del articulo es el siguiente: " + URL_NVIDIA
+
         if SEND_IMG:
             sendAlertMailWithImg(SENDER_ADDR, RECEIVER_ADDR, "STOCK DE RTX 5090", message, IMAGE_PATH)
         else:
             sendAlertMail(SENDER_ADDR, RECEIVER_ADDR, "STOCK DE RTX 5090", message)
+
         print("STOCK - Mail sent at: ", time.ctime(time.time()))
         print("")
 
@@ -124,6 +163,7 @@ try:
     for i in range(N):
         # Check if there is stock of FE
         driver.get(URL_NVIDIA)
+        hideCookiePopup(driver)
         time.sleep(WAIT_TIME)
         checkStockNvidia(driver)
 
